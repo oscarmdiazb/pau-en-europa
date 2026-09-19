@@ -165,12 +165,13 @@ nav.tabs button.on{color:var(--accent)}
 <script>
 'use strict';
 // ====== Ajustes que Oscar puede cambiar ======
-const GIFT_MSG = `Pau: te armé esta app para que lleves todo el viaje en el bolsillo. Aquí está tu plan de cada día, tus entradas, tus gastos y un diario para guardar lo que vivas.
+const GIFT_MSG = `Me emociona saber que vas a empezar esta aventura. Te mereces un viaje muy lindo, en el que puedas conectarte con el mundo y re-conectarte con lo que eres y quieres para tu vida. Me da curiosidad todo lo que cada lugar te va a regalar; lo que vas a pensar, reflexionar, sentir, vivir, conocer, sufrir, sobrepasar.
 
-Funciona sin internet y guarda todo solita cuando vuelve la señal.
+¿Con qué pregunta te vas? ¿Y con qué otras volverás?
 
-¡Disfruta cada día!
-— Oscar`;
+¡Disfruta cada día y deja que el camino te sorprenda!
+
+— Mauri`;
 const API = 'https://sxfbzcnsbcvitaenwpct.supabase.co/functions/v1/pau-europa/';
 
 // ====== Utilidades ======
@@ -550,7 +551,7 @@ function viewMas() {
     ['ajustes', '⚙️', 'Ajustes', 'Copia, moneda, clave'],
   ];
   return topBar('Más') + `<div class="wrap"><div class="grid2">${tiles.map(([k, e, t, s]) => `<button class="tile" data-act="sub" data-sub="${k}"><span class="big">${e}</span><b>${t}</b><span class="muted small">${s}</span></button>`).join('')}</div>
-  <p class="tiny muted" style="text-align:center;margin-top:18px">Hecho con cariño por Oscar 💛</p></div>`;
+  <p class="tiny muted" style="text-align:center;margin-top:18px">Hecho con cariño por Mauri 💛</p></div>`;
 }
 const subTop = (t) => topBar(t, `<button class="link" data-act="sub" data-sub="">← Más</button>`);
 const SUBS = {
@@ -606,7 +607,7 @@ const SUBS = {
     <div class="card"><h3>💱 Francos suizos</h3><div class="field"><label>1 CHF equivale a (euros)</label><input type="number" step="0.01" inputmode="decimal" value="${s.chf || 1.07}" data-input="chf"></div></div>
     <div class="card"><h3>💾 Copia de seguridad</h3><p class="small muted">Descarga todo lo que has escrito (sin fotos) en un archivo.</p><button class="btn ghost sm" data-act="backup">Descargar copia</button></div>
     <div class="card"><h3>📲 Instalar en el celular</h3><p class="small" style="margin:0"><b>iPhone:</b> en Safari toca <b>Compartir</b> → <b>Agregar a inicio</b>.<br><b>Android:</b> en Chrome toca <b>⋮</b> → <b>Instalar app</b>.</p></div>
-    <div class="card"><h3>💌 La nota de Oscar</h3><button class="btn ghost sm" data-act="gift">Volver a leerla</button></div>
+    <div class="card"><h3>💌 La nota de Mauri</h3><button class="btn ghost sm" data-act="gift">Volver a leerla</button></div>
     <p class="tiny muted" style="text-align:center">Versión del plan: ${esc(seed.version)}</p></div>`;
   },
 };
@@ -845,7 +846,7 @@ setInterval(() => sync(), 60000);
 function screenKey(msg = '') {
   $('#tabs').hidden = true;
   $('#app').innerHTML = `<div class="gift"><div style="font-size:54px">🔐</div><h1 style="margin:8px 0">Pau en Europa</h1>
-    <p class="muted">Escribe la clave que te mandó Oscar.</p>
+    <p class="muted">Escribe la clave que te mandó Mauri.</p>
     <form id="kf"><input name="k" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="clave" style="font-size:20px;text-align:center">
     <button class="btn block" style="margin-top:12px">Entrar</button></form><p class="small" style="color:var(--bad)">${esc(msg)}</p></div>`;
   $('#kf').addEventListener('submit', (e) => { e.preventDefault(); const k = e.target.k.value.trim().toLowerCase(); if (!k) return; localStorage.setItem('pe.key', k); KEY = k; boot(); });

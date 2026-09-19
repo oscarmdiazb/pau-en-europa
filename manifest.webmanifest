@@ -1,0 +1,12 @@
+{
+  "name": "Pau en Europa",
+  "short_name": "Pau en Europa",
+  "description": "Tu viaje por Europa: plan, entradas, gastos y diario",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FBF6EE",
+  "theme_color": "#D9623B",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

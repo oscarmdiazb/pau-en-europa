@@ -152,6 +152,18 @@ nav.tabs button.on{color:var(--accent)}
 .gift{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;max-width:520px;margin:0 auto}
 .gift .note{background:var(--card);border-radius:20px;padding:22px;box-shadow:var(--shadow);font-size:17px;line-height:1.55;margin:18px 0 22px;position:relative}
 .gift .note::before{content:"💌";position:absolute;top:-18px;left:18px;font-size:32px}
+.mantra{background:linear-gradient(135deg,color-mix(in srgb,var(--teal) 12%,var(--card)),var(--card));border-left:4px solid var(--teal)}
+.mantra p{font-family:Fraunces,Georgia,serif;font-style:italic;font-size:19px;line-height:1.4;margin:6px 0 0}
+.mapbox{height:320px;border-radius:14px;overflow:hidden;background:var(--soft);position:relative;z-index:0}
+.mapbox.full{position:fixed;inset:0;height:auto;border-radius:0;z-index:40}
+.mapfs{position:absolute;top:10px;right:10px;z-index:500;background:var(--card);color:var(--ink);border-radius:10px;padding:7px 11px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+.mapbox.full .mapfs{top:calc(10px + env(safe-area-inset-top))}
+.pin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.pin.now{width:44px;height:44px;font-size:22px;outline:4px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.pin b{position:absolute;top:-8px;right:-8px;background:var(--ink);color:var(--bg);font:700 10px/16px "DM Sans";min-width:16px;height:16px;border-radius:8px;text-align:center;padding:0 3px}
+.mapbox .leaflet-tile-pane{filter:saturate(.75) sepia(.12)}
+@media (prefers-color-scheme:dark){.mapbox .leaflet-tile-pane{filter:invert(.92) hue-rotate(180deg) brightness(.9) saturate(.6)}}
+.leaflet-popup-content{font:14px/1.4 "DM Sans",sans-serif;margin:10px 14px}
 .empty{text-align:center;color:var(--muted);padding:20px 8px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14.5px}
 .kv dt{color:var(--muted);font-weight:500} .kv dd{margin:0}
@@ -164,7 +176,7 @@ nav.tabs button.on{color:var(--accent)}
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
-// ====== Ajustes que Oscar puede cambiar ======
+// ====== Ajustes que se pueden cambiar ======
 const GIFT_MSG = `Me emociona saber que vas a empezar esta aventura. Te mereces un viaje muy lindo, en el que puedas conectarte con el mundo y re-conectarte con lo que eres y quieres para tu vida. Me da curiosidad todo lo que cada lugar te va a regalar; lo que vas a pensar, reflexionar, sentir, vivir, conocer, sufrir, sobrepasar.
 
 ¿Con qué pregunta te vas? ¿Y con qué otras volverás?
@@ -379,6 +391,7 @@ function viewAntes() {
     <div>${esc(fmt(d1.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · ${d1.moves[0] ? esc(d1.moves[0].route + ' · ' + d1.moves[0].time.split('→')[0]) : ''}</div>
     <div class="nav"><button data-act="openDay" data-date="${d1.date}">Ver el día 1 →</button><button data-act="tab" data-tab="viaje">Toda la ruta</button></div>
   </div>
+  ${d1.mantra ? `<div class="card mantra"><div class="tiny muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.04em">🧘 Mantra para empezar</div><p>${esc(d1.mantra)}</p></div>` : ''}
   ${alertsCard()}
   <div class="card"><h3>✅ Antes de salir <span class="chip">${pend.length} por hacer</span></h3>
     ${pend.slice(0, 6).map(taskRow).join('') || '<div class="empty">¡Todo listo! 🎉</div>'}
@@ -437,6 +450,7 @@ function dayView(date, isHoy = false) {
     ${!isToday && phase() === 'durante' ? `<button data-act="openDay" data-date="${today()}">Hoy</button>` : ''}
     <button data-act="openDay" data-date="${next ? next.date : ''}" ${next ? '' : 'disabled'}>${next ? esc(fmt(next.date, { day: 'numeric', month: 'short' })) : ''} →</button></div>
   </div>
+  ${d.mantra ? `<div class="card mantra"><div class="tiny muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.04em">🧘 Mantra del día</div><p>${esc(d.mantra)}</p></div>` : ''}
   ${isHoy ? alertsCard() : ''}
   <div class="card" id="wx" data-date="${date}"><div class="between"><h3 style="margin:0">🌦️ Clima</h3><span class="muted small">…</span></div></div>
   ${d.moves.length ? `<div class="card"><h3>🧭 Traslados</h3>${d.moves.map((m) => `<div class="move"><span class="ic">${m.icon}</span><div><b>${esc(m.route)}</b><div class="small muted">${esc([m.time, m.note].filter(Boolean).join(' · '))}</div></div></div>`).join('')}</div>` : ''}
@@ -492,7 +506,10 @@ function viewViaje() {
       <div class="main"><div class="tt">${d.emoji} ${esc(d.title)}</div><div class="small muted">${esc(fmt(d.date, { weekday: 'long' }))}${d.night ? ' · 🛏️ ' + esc(d.night) : ''}</div></div>
       <div style="text-align:right">${j ? `<div>${j.mood || '📔'}</div>` : ''}${done ? `<div class="tiny muted">${done}/${plan.length}</div>` : ''}</div></button>`;
   }
-  return topBar('Tu ruta') + `<div class="wrap"><p class="muted small" style="margin:0 0 4px">${esc(fmt(seed.start, { day: 'numeric', month: 'long' }))} → ${esc(fmt(seed.end, { day: 'numeric', month: 'long' }))} · ${seed.days.length} días</p>${html}</div>`;
+  return topBar('Tu ruta') + `<div class="wrap">
+  <div class="card" style="padding:10px"><div class="mapbox" id="map"><button class="mapfs" data-act="mapFull">⤢ Ampliar</button></div>
+    <p class="tiny muted" style="margin:8px 4px 0">Toca un punto para ver las fechas. ${stops().length} paradas por 5 países.</p></div>
+  <p class="muted small" style="margin:0 0 4px">${esc(fmt(seed.start, { day: 'numeric', month: 'long' }))} → ${esc(fmt(seed.end, { day: 'numeric', month: 'long' }))} · ${seed.days.length} días</p>${html}</div>`;
 }
 
 function passportPlaces() {
@@ -647,7 +664,8 @@ function sheetJournal(date) {
   const d = dayOf(date), j = () => get('jr:' + date, { mood: '', best: '', text: '', photos: [] });
   const cur = j();
   const sh = sheet(`<div class="tiny muted" style="font-weight:700;text-transform:uppercase">Día ${dayNum(date)} · ${esc(fmt(date, { weekday: 'long', day: 'numeric', month: 'long' }))}</div>
-    <h2 style="margin:2px 0 12px">${d.emoji} ${esc(d.title)}</h2>
+    <h2 style="margin:2px 0 ${d.mantra ? 6 : 12}px">${d.emoji} ${esc(d.title)}</h2>
+    ${d.mantra ? `<p class="muted" style="font-family:Fraunces,serif;font-style:italic;margin:0 0 12px">🧘 ${esc(d.mantra)}</p>` : ''}
     <div class="field"><label>¿Cómo te sentiste?</label><div class="moods">${MOODS.map((m) => `<button data-mood="${m}" class="${cur.mood === m ? 'on' : ''}">${m}</button>`).join('')}</div></div>
     <div class="field"><label>Lo mejor del día</label><input data-j="best" value="${esc(cur.best)}" placeholder="Ese momento que no quieres olvidar"></div>
     <div class="field"><label>Cuéntalo todo</label><textarea data-j="text" rows="6" placeholder="Qué hiciste, qué comiste, a quién conociste, qué te sorprendió…">${esc(cur.text)}</textarea></div>
@@ -782,6 +800,50 @@ async function paintWeather() {
   } catch { if (!c && !cl) el.remove(); }
 }
 
+
+// ====== Mapa del recorrido ======
+function stops() {
+  const emo = Object.fromEntries(passportPlaces().map((p) => [p.place, p.emoji]));
+  const out = [];
+  for (const d of seed.days) {
+    if (d.place === 'Bogotá') continue;
+    const last = out[out.length - 1];
+    if (last && last.place === d.place) last.to = d.date;
+    else out.push({ place: d.place, lat: d.lat, lon: d.lon, country: d.country, emoji: emo[d.place] || d.emoji, from: d.date, to: d.date });
+  }
+  return out;
+}
+let mapInst = null, leafletP = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (leafletP) return leafletP;
+  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.append(css);
+  leafletP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; sc.onload = res; sc.onerror = () => { leafletP = null; rej(); }; document.head.append(sc); });
+  return leafletP;
+}
+async function paintMap() {
+  if (mapInst) { mapInst.remove(); mapInst = null; }
+  const el = $('#map'); if (!el) return;
+  try { await loadLeaflet(); } catch { el.insertAdjacentHTML('beforeend', '<div class="empty" style="padding-top:130px">El mapa necesita internet 📶</div>'); return; }
+  if (!document.body.contains(el)) return;
+  const mob = matchMedia('(pointer:coarse)').matches;
+  const m = L.map(el, { zoomControl: !mob, dragging: !mob, tap: false, scrollWheelZoom: false, attributionControl: true });
+  mapInst = m;
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(m);
+  const st = stops(), t0 = today(), pts = st.map((s) => [s.lat, s.lon]);
+  L.polyline(pts, { color: '#D9623B', weight: 3, opacity: 0.85, dashArray: '6 7' }).addTo(m);
+  const past = st.filter((s) => s.from <= t0).map((s) => [s.lat, s.lon]);
+  if (past.length > 1) L.polyline(past, { color: '#D9623B', weight: 4, opacity: 1 }).addTo(m);
+  st.forEach((s, i) => {
+    const now = s.from <= t0 && t0 <= s.to;
+    const icon = L.divIcon({ className: '', html: `<div class="pin ${now ? 'now' : ''}" style="background:var(--${s.country})">${s.emoji}<b>${i + 1}</b></div>`, iconSize: now ? [44, 44] : [34, 34], iconAnchor: now ? [22, 22] : [17, 17] });
+    const dates = s.from === s.to ? fmt(s.from) : `${fmt(s.from, { day: 'numeric', month: 'short' })} – ${fmt(s.to, { day: 'numeric', month: 'short' })}`;
+    L.marker([s.lat, s.lon], { icon, zIndexOffset: now ? 1000 : i }).addTo(m)
+      .bindPopup(`<b>${i + 1}. ${esc(s.place)}</b> ${FLAG[s.country] || ''}<br><span style="color:var(--muted)">${esc(dates)}</span><br><a href="#" data-act="openDay" data-date="${s.from}">Ver el día →</a>`);
+  });
+  m.fitBounds(pts, { padding: [24, 24] });
+}
+
 // ====== Render y eventos ======
 function render() {
   if (!seed || !KEY) return;
@@ -791,6 +853,7 @@ function render() {
   $('.in', tabs).innerHTML = TABS.map(([k, l]) => `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}">${ICON[k]}${l}</button>`).join('');
   hydrateImages($('#app'));
   paintWeather();
+  paintMap();
 }
 const ACTS = {
   tab: (d) => { if (ui.tab === d.tab) { ui.day = null; ui.sub = null; } ui.tab = d.tab; store('pe.tab', ui.tab); render(); scrollTo(0, 0); },
@@ -818,6 +881,14 @@ const ACTS = {
   tkf: (d) => { ui.tkFilter = d.f; render(); },
   sub: (d) => { ui.tab = 'mas'; ui.sub = d.sub || null; store('pe.tab', 'mas'); render(); scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
+  mapFull: (d, el) => {
+    const box = $('#map'); if (!box || !mapInst) return;
+    const full = box.classList.toggle('full');
+    el.textContent = full ? '✕ Cerrar' : '⤢ Ampliar';
+    $('#tabs').hidden = full;
+    if (full) mapInst.dragging.enable(); else if (matchMedia('(pointer:coarse)').matches) mapInst.dragging.disable();
+    setTimeout(() => { mapInst.invalidateSize(); mapInst.fitBounds(stops().map((x) => [x.lat, x.lon]), { padding: [30, 30] }); }, 50);
+  },
   syncNow: () => { sync(); toast('Guardando…'); },
   gift: () => sheetGift(),
   backup: () => {

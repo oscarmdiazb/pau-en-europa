@@ -1,5 +1,5 @@
 // Guarda la app en el celular para que abra sin internet (trenes, montañas, aviones).
-const CACHE = 'pau-v1';
+const CACHE = 'pau-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -11,8 +11,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  // Fuentes: primero caché.
-  if (url.host.includes('fonts.g')) {
+  // Fuentes, mapa (Leaflet) y cuadros del mapa: primero caché.
+  if (url.host.includes('fonts.g') || url.host === 'cdnjs.cloudflare.com' || url.host === 'tile.openstreetmap.org') {
     e.respondWith(caches.open(CACHE).then(async (c) => (await c.match(e.request)) || fetch(e.request).then((r) => { c.put(e.request, r.clone()); return r; })));
     return;
   }
